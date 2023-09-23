@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-require 'CHaserConnect.rb' #呼び出すおまじない
-require 'CHaserTools.rb'
+require './CHaserConnect.rb' #呼び出すおまじない
+require './CHaserTools.rb'
 
 include Action
 include Direction
@@ -13,8 +13,59 @@ random = Random.new # 乱数生成
 
 direction = Direction::UP
 
-def get_item values, can_move
-  2.step(9, 2) { |i| item.push(i) if values[i] == MapInfo::ITEM }
+def get_slash_item values, move_direction
+  move = []
+
+  1.step(10, 2) { |i|
+    next if values[i] != MapInfo::ITEM
+
+    case i
+    when 1
+      move << ([2, 4] & move_direction)
+    when 3
+      move << ([2, 6] & move_direction)
+    when 7
+      move << ([8, 4] & move_direction)
+    when 9
+      move << ([8, 6] & move_direction)
+    end
+  }
+
+  move.flatten!
+
+  if !move.size.zero?
+    return move.uniq
+  else
+    return move_direction
+  end
+
+end
+
+def get_item values, move_direction
+  return move_direction if !values.include?(MapInfo::ITEM)
+
+  item = 2.step(9, 2).to_a.select { |i| values[i] == MapInfo::ITEM }
+
+  if !item.size.zero?
+    return item
+  else
+    return get_slash_item(values, move_direction)
+  end
+
+end
+
+def attack_enemy values, action, direction
+  return action, direction if values.index(MapInfo::ENEMY, 1).nil?
+
+  enemy = values.index(MapInfo::ENEMY, 1)
+
+  if enemy.even?
+    return Action::PUT, enemy
+  else
+    #斜めの敵は無視(暫定対応)
+    return action, direction
+  end
+end
 
 #--------ここから--------
 loop do # ここからループ
@@ -27,12 +78,19 @@ loop do # ここからループ
   end
 #-----ここまで書き換えない-----
 
-  can_move = 2.step(9, 2) { |i| can_move.push(i) if values[i] != MapInfo::BLOCK }.to_a
+action = Action::WALK
 
+#四方向のブロックがないリスト
+move_direction = 2.step(9, 2).to_a.select { |i| values[i] != MapInfo::BLOCK }
 
-direction = can_move.sample
+#アイテムがある場合は行きたい方向のリストにする
+move_direction = get_item(values, move_direction)
 
-act_values = target.order(Action::WALK, direction)
+direction = move_direction.sample
+
+action, direction = attack_enemy(values, action, direction)
+
+act_values = target.order(action, direction)
 
 #---------ここから---------
   if values[0] == 0
