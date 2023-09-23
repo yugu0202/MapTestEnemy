@@ -44,7 +44,7 @@ end
 def get_item values, move_direction
   return move_direction if !values.include?(MapInfo::ITEM)
 
-  item = 2.step(9, 2).to_a.select { |i| values[i] == MapInfo::ITEM }
+  item = [2, 4, 6, 8].select { |i| values[i] == MapInfo::ITEM }
 
   if !item.size.zero?
     return item
@@ -81,7 +81,7 @@ loop do # ここからループ
 action = Action::WALK
 
 #四方向のブロックがないリスト
-move_direction = 2.step(9, 2).to_a.select { |i| values[i] != MapInfo::BLOCK }
+move_direction = [2, 4, 6, 8].select { |i| values[i] != MapInfo::BLOCK }
 
 #アイテムがある場合は行きたい方向のリストにする
 move_direction = get_item(values, move_direction)
