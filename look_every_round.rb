@@ -7,23 +7,14 @@ include Direction
 include MapInfo
 
 # 書き換えない
-target = CHaserConnect.new("prac") # ()の中好きな名前
+target = CHaserConnect.new("everyLook") # ()の中好きな名前
 values = Array.new(10)
 random = Random.new # 乱数生成
 
 direction = Direction::UP
 
-def create_can_move values
-  can_move = []
-
-  2.step(9, 2) { |i|
-    if values[i] != MapInfo::BLOCK
-      can_move.push(i)
-    end
-  }
-
-  return can_move
-end
+def get_item values, can_move
+  2.step(9, 2) { |i| item.push(i) if values[i] == MapInfo::ITEM }
 
 #--------ここから--------
 loop do # ここからループ
@@ -36,7 +27,8 @@ loop do # ここからループ
   end
 #-----ここまで書き換えない-----
 
-can_move = create_can_move(values)
+  can_move = 2.step(9, 2) { |i| can_move.push(i) if values[i] != MapInfo::BLOCK }.to_a
+
 
 direction = can_move.sample
 
