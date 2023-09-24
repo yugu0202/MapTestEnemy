@@ -7,7 +7,7 @@ include Direction
 include MapInfo
 
 # 書き換えない
-target = CHaserConnect.new("prac") # ()の中好きな名前
+target = CHaserConnect.new("avoid wall onry") # ()の中好きな名前
 values = Array.new(10)
 random = Random.new # 乱数生成
 
@@ -38,9 +38,13 @@ loop do # ここからループ
 
 can_move = create_can_move(values)
 
-direction = can_move.sample
-
-act_values = target.order(Action::WALK, direction)
+if can_move.include?(direction)
+  act_values = target.order(Action::WALK, direction)
+else
+  # 同じ方向が含まれていない場合、ランダムに選択
+  direction = can_move.sample
+  act_values = target.order(Action::WALK, direction)
+end
 
 #---------ここから---------
   if values[0] == 0
